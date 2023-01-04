@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: livebackend
+
+server:
+  port: 9090
+# mysql
+datasource:
+  url: jdbc:mysql://localhost:3306/powerhair?useUnicode=true&characterEncoding=utf-8&useOldAliasMetadataBehavior=true&serverTimezone=Asia/Shanghai&allowMultiQueries=true
+  username: root
+  password: 677saber
+  driver-class-name: com.mysql.cj.jdbc.Driver
