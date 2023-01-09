@@ -70,25 +70,24 @@ public class ClientSocket {
 //        json.put("type", 2);
 //        json.put("key", "u91Sk476h2FV7KCv59U35sEAuVNmQUq0yBfeqJVHIKZqkxVPe_hJYD1GKS-cS43jNMVpD_TEih7K-ybwqpGvotO7luheMjhEi0w7wjILrm8WJ-dL4xid3D0rnJiP7QruH3xTVYNw41xffdF5-UM=");
 
-        ByteArrayBuffer bytes = certification(json);
-        int size = bytes.size();
-        if (Objects.isNull(bytes)) {
+        ByteArrayBuffer dataBytes = certification(json);
+        if (Objects.isNull(dataBytes)) {
             throw new RuntimeException("认证数据结果为空");
         }
-        byte[] data = bytes.getRawData();
+        int size = dataBytes.size();
+        byte[] bytes = dataBytes.getRawData();
 
         binaryHandleUtil.setUnit(0, UnitEnum.UNIT32, size + 16)
                 .setUnit(4, UnitEnum.UNIT16, 16)
                 .setUnit(6, UnitEnum.UNIT16, 1)
                 .setUnit(8, UnitEnum.UNIT32, 7)
                 .setUnit(12, UnitEnum.UNIT32, 1);
-        for (int i = 0; i < data.length; i++) {
-            binaryHandleUtil.setUnit(16 + i,UnitEnum.UNIT8, Integer.parseInt(data[i] + ""));
+        for (int i = 0; i < bytes.length; i++) {
+            binaryHandleUtil.setUnit(16 + i,UnitEnum.UNIT8, Integer.parseInt(bytes[i] + ""));
         }
 
-        String hexStr = binaryHandleUtil.getHexStr();
-        byte[] bytes1 = HexStrToByteArray(hexStr);
-        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes1);
+        String hexBytesStr = binaryHandleUtil.getHexBytesStr();
+        ByteBuffer byteBuffer = ByteBuffer.wrap(HexStrToByteArray(hexBytesStr));
         try {
             session.getBasicRemote().sendBinary(byteBuffer);
         } catch (IOException e) {

@@ -25,7 +25,7 @@ public class BinaryHandleUtil {
         return this;
     }
 
-    public String getHexStr(){
+    public String getHexBytesStr(){
         return this.instance.getReqParam().toString();
     }
 
