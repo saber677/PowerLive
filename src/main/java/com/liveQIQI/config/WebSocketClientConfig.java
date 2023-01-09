@@ -1,7 +1,5 @@
 package com.liveQIQI.config;
 
-import com.liveQIQI.websocket.client.ClientSocket;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import javax.websocket.*;
 

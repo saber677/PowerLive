@@ -13,18 +13,20 @@ public class BinaryHandleUtil {
     @Autowired
     private BinaryHandleInstance instance;
 
-    public String setUnit(Integer offset, UnitEnum unit, Integer value){
+    public BinaryHandleUtil setUnit(Integer offset, UnitEnum unit, Integer value){
 
         if (Objects.isNull(value)){
             throw new RuntimeException(" ===> value is null");
         }
 
         String valueStr = Integer.toHexString(value);
-        StringBuffer stringBuffer = new BinaryHandleInstance().handleByteData(offset, unit, valueStr);
+        StringBuffer stringBuffer = instance.handleByteData(offset, unit, valueStr);
         String s = stringBuffer.toString();
+        return this;
+    }
 
-        return s;
-
+    public String getHexStr(){
+        return this.instance.getReqParam().toString();
     }
 
 

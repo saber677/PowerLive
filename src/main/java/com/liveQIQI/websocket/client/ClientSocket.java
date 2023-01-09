@@ -51,8 +51,7 @@ public class ClientSocket {
         try {
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             URI uri = URI.create(url);
-            ClientSocket clientSocket = new ClientSocket();
-            container.connectToServer(clientSocket, uri);
+            container.connectToServer(ClientSocket.this, uri);
         } catch (DeploymentException | IOException e) {
             logger.error(e.getMessage(), e);
         }
@@ -64,31 +63,32 @@ public class ClientSocket {
         logger.info("===" + "连接 billibili 成功");
         JSONObject json = new JSONObject();
         json.put("uid", 0);
-        json.put("room_id", 25878472);
+        json.put("roomid", 25878472);//todo _
         json.put("protover", 3);
         json.put("platform", "web");
-//        json.put("clientver", "1.4.0");
-        json.put("type", 2);
-        json.put("key", "u91Sk476h2FV7KCv59U35sEAuVNmQUq0yBfeqJVHIKZqkxVPe_hJYD1GKS-cS43jNMVpD_TEih7K-ybwqpGvotO7luheMjhEi0w7wjILrm8WJ-dL4xid3D0rnJiP7QruH3xTVYNw41xffdF5-UM=");
+        json.put("clientver", "1.4.0");
+//        json.put("type", 2);
+//        json.put("key", "u91Sk476h2FV7KCv59U35sEAuVNmQUq0yBfeqJVHIKZqkxVPe_hJYD1GKS-cS43jNMVpD_TEih7K-ybwqpGvotO7luheMjhEi0w7wjILrm8WJ-dL4xid3D0rnJiP7QruH3xTVYNw41xffdF5-UM=");
 
         ByteArrayBuffer bytes = certification(json);
+        int size = bytes.size();
         if (Objects.isNull(bytes)) {
             throw new RuntimeException("认证数据结果为空");
         }
         byte[] data = bytes.getRawData();
 
-        String s = new BinaryHandleUtil().setUnit(0, UnitEnum.UNIT32, data.length + 16);
-//        String s1 = new BinaryHandleUtil().setUnit(4, UnitEnum.UNIT16, 16);
-//        String s2 = new BinaryHandleUtil().setUnit(6, UnitEnum.UNIT16, 1);
-//        String s3 = new BinaryHandleUtil().setUnit(8, UnitEnum.UNIT32, 7);
-//        StringBuffer stringBuffer = new StringBuffer();
-//        stringBuffer.append(s).append(s1).append(s2).append(s3);
+        binaryHandleUtil.setUnit(0, UnitEnum.UNIT32, size + 16)
+                .setUnit(4, UnitEnum.UNIT16, 16)
+                .setUnit(6, UnitEnum.UNIT16, 1)
+                .setUnit(8, UnitEnum.UNIT32, 7)
+                .setUnit(12, UnitEnum.UNIT32, 1);
         for (int i = 0; i < data.length; i++) {
-            System.out.println(data[i] + "");
+            binaryHandleUtil.setUnit(16 + i,UnitEnum.UNIT8, Integer.parseInt(data[i] + ""));
         }
 
-        ByteBuffer byteBuffer = ByteBuffer.wrap(data);
-        certifyRequest(25878472, url);
+        String hexStr = binaryHandleUtil.getHexStr();
+        byte[] bytes1 = HexStrToByteArray(hexStr);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes1);
         try {
             session.getBasicRemote().sendBinary(byteBuffer);
         } catch (IOException e) {

@@ -17,7 +17,7 @@ public class TestController {
     @GetMapping(value = "/")
     public void test(){
         System.out.println("suqgduvbqbvdfjkqbjqkqd");
-
+        System.out.println(clientSocket);
 //        clientSocket.init();
     }
 

@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 @Component
+@Data
 public class BinaryHandleInstance {
 
     private static final char ZERO = '0';
