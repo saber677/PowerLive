@@ -60,19 +60,20 @@ public class ClientSocket {
     @OnOpen
     public void onOpen(Session session) {
         this.session = session;
-        logger.info("===" + "连接 billibili 成功");
+        logger.info(" ===> 连接 billibili 成功");
+
         JSONObject json = new JSONObject();
         json.put("uid", 0);
         json.put("roomid", 25878472);//todo _
         json.put("protover", 3);
         json.put("platform", "web");
-        json.put("clientver", "1.4.0");
-//        json.put("type", 2);
-//        json.put("key", "u91Sk476h2FV7KCv59U35sEAuVNmQUq0yBfeqJVHIKZqkxVPe_hJYD1GKS-cS43jNMVpD_TEih7K-ybwqpGvotO7luheMjhEi0w7wjILrm8WJ-dL4xid3D0rnJiP7QruH3xTVYNw41xffdF5-UM=");
+//        json.put("clientver", "1.4.0");
+        json.put("type", 2);
+        json.put("key", "u91Sk476h2FV7KCv59U35sEAuVNmQUq0yBfeqJVHIKZqkxVPe_hJYD1GKS-cS43jNMVpD_TEih7K-ybwqpGvotO7luheMjhEi0w7wjILrm8WJ-dL4xid3D0rnJiP7QruH3xTVYNw41xffdF5-UM=");
 
-        ByteArrayBuffer dataBytes = certification(json);
+        ByteArrayBuffer dataBytes = buildCertifyByte(json);
         if (Objects.isNull(dataBytes)) {
-            throw new RuntimeException("认证数据结果为空");
+            throw new RuntimeException(" ===> 认证数据结果为空");
         }
         int size = dataBytes.size();
         byte[] bytes = dataBytes.getRawData();
@@ -82,12 +83,11 @@ public class ClientSocket {
                 .setUnit(6, UnitEnum.UNIT16, 1)
                 .setUnit(8, UnitEnum.UNIT32, 7)
                 .setUnit(12, UnitEnum.UNIT32, 1);
-        for (int i = 0; i < bytes.length; i++) {
+        for (int i = 0; i < size; i++) {
             binaryHandleUtil.setUnit(16 + i,UnitEnum.UNIT8, Integer.parseInt(bytes[i] + ""));
         }
 
-        String hexBytesStr = binaryHandleUtil.getHexBytesStr();
-        ByteBuffer byteBuffer = ByteBuffer.wrap(HexStrToByteArray(hexBytesStr));
+        ByteBuffer byteBuffer = ByteBuffer.wrap(binaryHandleUtil.HexByteArray());
         try {
             session.getBasicRemote().sendBinary(byteBuffer);
         } catch (IOException e) {
@@ -98,12 +98,12 @@ public class ClientSocket {
 
     @OnClose
     public void onClose() {
-        logger.info("===" + "关闭 billibili 成功");
+        logger.info(" ===> 关闭 billibili 成功");
     }
 
     @OnError
     public void onError(Throwable e) {
-        logger.info("===" + "连接bilibili 发生异常");
+        logger.info(" ===> 连接bilibili 发生异常");
         logger.error(e.getMessage(), e);
     }
 
@@ -111,13 +111,13 @@ public class ClientSocket {
     public void onMessage(Session session, byte[] message) {
         try {
             String messageStr = new String(message, "utf-8");
-            logger.info("===" + "接收到来自bilibili的数据" + messageStr);
+            logger.info(" ===> 接收到来自bilibili的数据" + messageStr);
         } catch (UnsupportedEncodingException e) {
             logger.error(e.getMessage(), e);
         }
     }
 
-    private ByteArrayBuffer certification(JSONObject jsonObject) {
+    private ByteArrayBuffer buildCertifyByte(JSONObject jsonObject) {
         ByteArrayBuffer bytes = new ByteArrayBuffer();
         String jsonStr = jsonObject.toJSONString();
         int length = jsonStr.length();

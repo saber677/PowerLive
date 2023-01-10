@@ -12,13 +12,17 @@ import org.springframework.stereotype.Component;
 public class BinaryHandleInstance {
 
     private static final char ZERO = '0';
-    private StringBuffer reqParam =new StringBuffer();
+    private StringBuffer reqParam = new StringBuffer();
 
     public StringBuffer handleByteData(Integer offset, UnitEnum unit, String valueStr) {
 
         valueStr = fillValueStr(unit, valueStr);
 
-        this.reqParam.insert(finalOffset(offset), valueStr);
+        try {
+            this.reqParam.insert(finalOffset(offset), valueStr);
+        } catch (Exception e) {
+            throw new RuntimeException(" ===> the value of offset is error");
+        }
         return reqParam;
     }
 
