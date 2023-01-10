@@ -21,8 +21,7 @@ public class BinaryHandleUtil {
         }
 
         String valueStr = Integer.toHexString(value);
-        StringBuffer stringBuffer = instance.handleByteData(offset, unit, valueStr);
-        String s = stringBuffer.toString();
+        instance.handleByteData(offset, unit, valueStr);
         return this;
     }
 
@@ -51,26 +50,12 @@ public class BinaryHandleUtil {
         return byteArray;
     }
 
-    public byte[] HexStrToByteArray2() {
-
-        String hexStr = this.getHexBytesStr();
-
-        if (Objects.isNull(hexStr)) {
-            return null;
-        }
-
-        if (Objects.equals(hexStr, 0)) {
-            return new byte[0];
-        }
-
-        int parseInt = Integer.parseInt(hexStr, 16);
-        BigInteger bigInteger = BigInteger.valueOf(parseInt);
-        return bigInteger.toByteArray();
-    }
-
-
     public byte[] HexByteArray(){
         return this.HexStrToByteArray();
+    }
+
+    public void clearInstanceBuffer(){
+        instance.setReqParam(new StringBuffer());
     }
 
 }

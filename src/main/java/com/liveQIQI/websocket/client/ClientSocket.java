@@ -9,6 +9,7 @@ import com.sun.xml.internal.ws.util.ByteArrayBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -83,12 +84,14 @@ public class ClientSocket {
                 .setUnit(8, UnitEnum.UNIT32, 7)
                 .setUnit(12, UnitEnum.UNIT32, 1);
         for (int i = 0; i < size; i++) {
-            binaryHandleUtil.setUnit(16 + i,UnitEnum.UNIT8, Integer.parseInt(bytes[i] + ""));
+            binaryHandleUtil.setUnit(16 + i, UnitEnum.UNIT8, Integer.parseInt(bytes[i] + ""));
         }
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(binaryHandleUtil.HexByteArray());
         try {
             session.getBasicRemote().sendBinary(byteBuffer);
+            binaryHandleUtil.clearInstanceBuffer();//清楚缓存
+            heartbeat();//心跳请求 保持连接
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
@@ -110,6 +113,8 @@ public class ClientSocket {
     public void onMessage(Session session, byte[] message) {
         try {
             String messageStr = new String(message, "utf-8");
+            ByteBuffer byteBuffer = ByteBuffer.wrap(message);
+            String s = byteBuffer.toString();
             logger.info(" ===> 接收到来自bilibili的数据" + messageStr);
         } catch (UnsupportedEncodingException e) {
             logger.error(e.getMessage(), e);
@@ -142,36 +147,24 @@ public class ClientSocket {
         return bytes;
     }
 
-    private void certifyRequest(Integer roomId, String url) {
+ /*   private void certifyRequest(Integer roomId, String url) {
         logger.info("===" + "发送认证请求");
         JsScriptUtil.certifyRequest(roomId, url);
-    }
+    }*/
 
-    public static byte[] HexStrToByteArray(String hexStr) {
-
-        if (hexStr == null) {
-
-            return null;
-
+    @Scheduled(fixedRate = 30 * 1000)
+    private void heartbeat() {
+        binaryHandleUtil.setUnit(0, UnitEnum.UNIT32, 0)
+                .setUnit(4, UnitEnum.UNIT16, 16)
+                .setUnit(6, UnitEnum.UNIT16, 1)
+                .setUnit(8, UnitEnum.UNIT32, 2)
+                .setUnit(12, UnitEnum.UNIT32, 1);
+        try {
+            ByteBuffer byteBuffer = ByteBuffer.wrap(binaryHandleUtil.HexByteArray());
+            this.session.getBasicRemote().sendBinary(byteBuffer);
+            logger.info(" ===> heartbeat ing");
+        } catch (IOException e) {
+            logger.error(e.getMessage(), e);
         }
-
-        if (hexStr.length() == 0) {
-
-            return new byte[0];
-
-        }
-
-        byte[] byteArray = new byte[hexStr.length() / 2];
-
-        for (int i = 0; i < byteArray.length; i++) {
-
-            String subStr = hexStr.substring(2 * i, 2 * i + 2);
-
-            byteArray[i] = ((byte) Integer.parseInt(subStr, 16));
-
-        }
-
-        return byteArray;
-
     }
 }

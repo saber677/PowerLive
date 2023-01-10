@@ -1,6 +1,9 @@
 spring:
   application:
     name: livebackend
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
 
 
 server:
@@ -11,3 +14,4 @@ datasource:
   username: root
   password: 677saber
   driver-class-name: com.mysql.cj.jdbc.Driver
+
