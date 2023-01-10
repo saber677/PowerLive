@@ -1,8 +1,6 @@
-package com.liveQIQI.utils;
+package com.liveQIQI.tool.utils;
 
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.core.io.ResourceLoader;
-import sun.rmi.rmic.iiop.ClassPathLoader;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;

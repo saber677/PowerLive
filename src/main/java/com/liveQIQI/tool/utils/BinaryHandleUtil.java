@@ -1,4 +1,4 @@
-package com.liveQIQI.utils;
+package com.liveQIQI.tool.utils;
 
 import com.liveQIQI.enums.UnitEnum;
 import com.liveQIQI.service.impl.BinaryHandleInstance;

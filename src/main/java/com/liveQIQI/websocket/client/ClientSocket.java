@@ -3,8 +3,8 @@ package com.liveQIQI.websocket.client;
 
 import com.alibaba.fastjson.JSONObject;
 import com.liveQIQI.enums.UnitEnum;
-import com.liveQIQI.utils.BinaryHandleUtil;
-import com.liveQIQI.utils.JsScriptUtil;
+import com.liveQIQI.tool.utils.BinaryHandleUtil;
+import com.liveQIQI.tool.utils.JsScriptUtil;
 import com.sun.xml.internal.ws.util.ByteArrayBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.websocket.*;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
