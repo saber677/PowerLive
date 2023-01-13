@@ -1,24 +1,33 @@
 package com.liveQIQI.websocket.client;
 
 
+import ch.qos.logback.core.encoder.ByteArrayUtil;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.liveQIQI.enums.UnitEnum;
 import com.liveQIQI.tool.utils.BinaryHandleUtil;
 import com.liveQIQI.tool.utils.JsScriptUtil;
 import com.sun.xml.internal.ws.util.ByteArrayBuffer;
+import io.swagger.util.Json;
+import org.apache.tomcat.util.buf.ByteBufferUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.web.socket.adapter.standard.ConvertingEncoderDecoderSupport;
 
 import javax.annotation.PostConstruct;
 import javax.websocket.*;
+import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.util.Objects;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
 
 @ClientEndpoint
 @Component
@@ -27,6 +36,8 @@ public class ClientSocket {
     private static final Logger logger = LoggerFactory.getLogger(ClientSocket.class);
 
     private Session session;
+
+    private ByteBuffer byteBuffer;
 
     String url = "wss://dsa-cn-live-comet-01.chat.bilibili.com:2245/sub";
 
@@ -111,14 +122,69 @@ public class ClientSocket {
 
     @OnMessage
     public void onMessage(Session session, byte[] message) {
+        logger.info(" ===> message:{}", message);
+        ByteBuffer byteBuffer = ByteBuffer.wrap(message);
+        logger.info(" ===> byteBuffer:{}", byteBuffer.toString());
+
+        StringBuilder stringBuilder = new StringBuilder();
+        while (byteBuffer.hasRemaining()) {
+            byte b = byteBuffer.get();
+            String s = Byte.toString(b);
+            stringBuilder.append(s);
+        }
+        String toString = stringBuilder.toString();
+        logger.info(" ===> 接收到来自bilibili的数据" + toString);
+
         try {
-            String messageStr = new String(message, "utf-8");
-            ByteBuffer byteBuffer = ByteBuffer.wrap(message);
-            String s = byteBuffer.toString();
-            logger.info(" ===> 接收到来自bilibili的数据" + messageStr);
+            Integer packageLength = readIntFromByteArray(byteBuffer, 0, 4);
+            Integer headLength = readIntFromByteArray(byteBuffer, 4, 2);
+            Integer ver = readIntFromByteArray(byteBuffer, 6, 2);
+            Integer op = readIntFromByteArray(byteBuffer, 8, 4);
+            Integer seq = readIntFromByteArray(byteBuffer, 12, 4);
+            if (Objects.equals(op, 5)) {
+                String body;
+                int offset = 0;
+                while (offset < message.length) {
+                    int countPackageLength = readIntFromByteArray(byteBuffer, offset + 0, 4);
+                    int countHeadLength = 16;
+                    byte[] car = new byte[countHeadLength + countPackageLength];
+                    logger.info(" ===> packageLength:{}", packageLength);
+                    logger.info(" ===> car:{}, offset:{}, length:{}", car.length, offset + countHeadLength, countPackageLength - countHeadLength - offset);
+                    byteBuffer.rewind();
+                    logger.info(" ===> position:{}", byteBuffer.position());
+                    logger.info(" ===> limit:{}", byteBuffer.limit());
+                    byteBuffer.get(car, offset + countHeadLength, countPackageLength - countHeadLength - offset);
+    //                let body = "{}"
+                    Inflater inflater = new Inflater();
+                    if (Objects.equals(ver, 2)) {
+                        //协议版本为 2 时  数据有进行压缩
+                        int inflate = inflater.inflate(car);
+                        String s = new String(car, 0, inflate, "UTF-8");
+                        logger.info(" ===> s:{}", s);
+                    } else {
+                        //协议版本为 0 时  数据没有进行压缩
+                        int inflate = inflater.inflate(car);
+                    }
+    //                if (body) {
+    //                    // 同一条消息中可能存在多条信息，用正则筛出来
+    //                    const group = body.split(/[\x00-\x1f]+/);
+    //                    group.forEach(item => {
+    //                    try {
+    //                        result.body.push(JSON.parse(item));
+    //                    }catch (e) {
+    //                        // 忽略非JSON字符串，通常情况下为分隔符
+    //                    }
+    //                    });
+    //                }
+                    offset += countPackageLength;
+                }
+            }
+        } catch (DataFormatException e) {
+            logger.error(e.getMessage(), e);
         } catch (UnsupportedEncodingException e) {
             logger.error(e.getMessage(), e);
         }
+        byteBuffer.clear();
     }
 
     private ByteArrayBuffer buildCertifyByte(JSONObject jsonObject) {
@@ -167,4 +233,32 @@ public class ClientSocket {
             logger.error(e.getMessage(), e);
         }
     }
+
+    private Integer readIntFromByteArray(byte[] byteArray, Integer start, Integer len) {
+        Double result = 0.0;
+        for (int i = len - 1; i >= 0; i--) {
+            result += Math.pow(256, len - i - 1) * byteArray[start + i];
+        }
+        logger.info(" ===> result = " + result.intValue());
+        return result.intValue();
+    }
+
+    private Integer readIntFromByteArray(ByteBuffer byteBuffer, Integer start, Integer len) {
+        Double result = 0.0;
+        for (int i = len - 1; i >= 0; i--) {
+            result += Math.pow(256, len - i - 1) * byteBuffer.get(start + i);
+        }
+        logger.info(" ===> result = " + result.intValue());
+        return result.intValue();
+    }
+
+    private Integer readIntFromByteArray(char[] byteBuffer, Integer start, Integer len) {
+        Double result = 0.0;
+        for (int i = len - 1; i >= 0; i--) {
+            result += Math.pow(256, len - i - 1) * byteBuffer[start + i];
+        }
+        logger.info(" ===> result = " + result.intValue());
+        return result.intValue();
+    }
+
 }
