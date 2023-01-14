@@ -1,11 +1,11 @@
 package com.liveQIQI.tool.utils;
 
-import com.liveQIQI.enums.UnitEnum;
+import com.liveQIQI.enums.UintEnum;
 import com.liveQIQI.service.impl.BinaryHandleInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import sun.jvm.hotspot.runtime.Bytes;
 
-import java.math.BigInteger;
 import java.util.Objects;
 
 @Component
@@ -14,9 +14,9 @@ public class BinaryHandleUtil {
     @Autowired
     private BinaryHandleInstance instance;
 
-    public BinaryHandleUtil setUnit(Integer offset, UnitEnum unit, Integer value){
+    public BinaryHandleUtil setUnit(Integer offset, UintEnum unit, Integer value) {
 
-        if (Objects.isNull(value)){
+        if (Objects.isNull(value)) {
             throw new RuntimeException(" ===> value is null");
         }
 
@@ -25,7 +25,7 @@ public class BinaryHandleUtil {
         return this;
     }
 
-    public String getHexBytesStr(){
+    public String getHexBytesStr() {
         return this.instance.getReqParam().toString();
     }
 
@@ -50,12 +50,50 @@ public class BinaryHandleUtil {
         return byteArray;
     }
 
-    public byte[] HexByteArray(){
+    public byte[] HexByteArray() {
         return this.HexStrToByteArray();
     }
 
-    public void clearInstanceBuffer(){
+    public void clearInstanceBuffer() {
         instance.setReqParam(new StringBuffer());
+    }
+
+    public int[] toUintArrayFromByteArray(byte[] bytes) {
+        int[] uintArray = new int[bytes.length];
+        for (int i = 0; i < bytes.length; i++) {
+            uintArray[i] = Byte.toUnsignedInt(bytes[i]);
+        }
+        return uintArray;
+    }
+
+    public StringBuilder toBinaryStrFromUintArray(int value, StringBuilder builder) {
+
+        if (Objects.isNull(value)){
+            throw new RuntimeException(" value is null");
+        }
+
+        String param1 = new String(String.valueOf(value));
+        String param2 = new String(",");
+        builder.append(param1);
+        builder.append(param2);
+        return builder;
+    }
+
+    public String getStrByDecompress(StringBuilder builder){
+        builder.deleteCharAt(builder.length() - 1);
+        String binaryStr = builder.toString();
+        byte[] clientBytes = PakoUtil.receive(binaryStr);
+        byte[] bytes = ZlibUtil.decompress(clientBytes);
+        return new String(bytes);
+    }
+
+    public byte[] getByteArrayFromInt(int value){
+        byte[] bytes = new byte[1];
+        bytes[0] =  (byte) (value & 0xFF);
+        bytes[1] =  (byte) ((value>>8) & 0xFF);
+        bytes[2] =  (byte) ((value>>16) & 0xFF);
+        bytes[3] =  (byte) ((value>>24) & 0xFF);
+        return bytes;
     }
 
 }

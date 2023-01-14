@@ -1,10 +1,7 @@
 package com.liveQIQI.service.impl;
 
-import com.liveQIQI.enums.UnitEnum;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.liveQIQI.enums.UintEnum;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -16,7 +13,7 @@ public class BinaryHandleInstance {
     private static final char ZERO = '0';
     private StringBuffer reqParam;
 
-    public StringBuffer handleByteData(Integer offset, UnitEnum unit, String valueStr) {
+    public StringBuffer handleByteData(Integer offset, UintEnum unit, String valueStr) {
 
         valueStr = fillValueStr(unit, valueStr);
 
@@ -31,14 +28,14 @@ public class BinaryHandleInstance {
         return reqParam;
     }
 
-    private String fillValueStr(UnitEnum unit, String valueStr) {
+    private String fillValueStr(UintEnum unit, String valueStr) {
         while (valueStr.length() < lengthFromUnit(unit)) {
             valueStr = ZERO + valueStr;
         }
         return valueStr;
     }
 
-    private Integer lengthFromUnit(UnitEnum unit) {
+    private Integer lengthFromUnit(UintEnum unit) {
         return unit.getByteNum();
     }
 

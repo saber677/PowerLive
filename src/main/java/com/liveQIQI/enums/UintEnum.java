@@ -1,10 +1,10 @@
 package com.liveQIQI.enums;
 
-public enum UnitEnum {
+public enum UintEnum {
 
-    UNIT32(8),
-    UNIT16(4),
-    UNIT8(2),
+    UINT32(8),
+    UINT16(4),
+    UINT8(2),
 
     ;
     private Integer byteNum;
@@ -17,7 +17,7 @@ public enum UnitEnum {
         this.byteNum = byteNum;
     }
 
-    UnitEnum(Integer byteNum) {
+    UintEnum(Integer byteNum) {
         this.byteNum = byteNum;
     }
 }

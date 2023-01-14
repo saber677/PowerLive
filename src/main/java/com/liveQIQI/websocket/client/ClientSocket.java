@@ -1,33 +1,25 @@
 package com.liveQIQI.websocket.client;
 
 
-import ch.qos.logback.core.encoder.ByteArrayUtil;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.liveQIQI.enums.UnitEnum;
+import com.liveQIQI.enums.UintEnum;
 import com.liveQIQI.tool.utils.BinaryHandleUtil;
-import com.liveQIQI.tool.utils.JsScriptUtil;
 import com.sun.xml.internal.ws.util.ByteArrayBuffer;
-import io.swagger.util.Json;
-import org.apache.tomcat.util.buf.ByteBufferUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.adapter.standard.ConvertingEncoderDecoderSupport;
 
 import javax.annotation.PostConstruct;
 import javax.websocket.*;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
 
 @ClientEndpoint
 @Component
@@ -37,7 +29,7 @@ public class ClientSocket {
 
     private Session session;
 
-    private ByteBuffer byteBuffer;
+    private StringBuilder builder;
 
     String url = "wss://dsa-cn-live-comet-01.chat.bilibili.com:2245/sub";
 
@@ -75,12 +67,12 @@ public class ClientSocket {
 
         JSONObject json = new JSONObject();
         json.put("uid", 0);
-        json.put("roomid", 25878472);//todo _
-        json.put("protover", 3);
+        json.put("roomid", 21144080);//todo _
+        json.put("protover", 1);
         json.put("platform", "web");
-//        json.put("clientver", "1.4.0");
-        json.put("type", 2);
-        json.put("key", "u91Sk476h2FV7KCv59U35sEAuVNmQUq0yBfeqJVHIKZqkxVPe_hJYD1GKS-cS43jNMVpD_TEih7K-ybwqpGvotO7luheMjhEi0w7wjILrm8WJ-dL4xid3D0rnJiP7QruH3xTVYNw41xffdF5-UM=");
+        json.put("clientver", "1.4.0");
+//        json.put("type", 2);
+//        json.put("key", "u91Sk476h2FV7KCv59U35sEAuVNmQUq0yBfeqJVHIKZqkxVPe_hJYD1GKS-cS43jNMVpD_TEih7K-ybwqpGvotO7luheMjhEi0w7wjILrm8WJ-dL4xid3D0rnJiP7QruH3xTVYNw41xffdF5-UM=");
 
         ByteArrayBuffer dataBytes = buildCertifyByte(json);
         if (Objects.isNull(dataBytes)) {
@@ -89,13 +81,13 @@ public class ClientSocket {
         int size = dataBytes.size();
         byte[] bytes = dataBytes.getRawData();
 
-        binaryHandleUtil.setUnit(0, UnitEnum.UNIT32, size + 16)
-                .setUnit(4, UnitEnum.UNIT16, 16)
-                .setUnit(6, UnitEnum.UNIT16, 1)
-                .setUnit(8, UnitEnum.UNIT32, 7)
-                .setUnit(12, UnitEnum.UNIT32, 1);
+        binaryHandleUtil.setUnit(0, UintEnum.UINT32, size + 16)
+                .setUnit(4, UintEnum.UINT16, 16)
+                .setUnit(6, UintEnum.UINT16, 1)
+                .setUnit(8, UintEnum.UINT32, 7)
+                .setUnit(12, UintEnum.UINT32, 1);
         for (int i = 0; i < size; i++) {
-            binaryHandleUtil.setUnit(16 + i, UnitEnum.UNIT8, Integer.parseInt(bytes[i] + ""));
+            binaryHandleUtil.setUnit(16 + i, UintEnum.UINT8, Integer.parseInt(bytes[i] + ""));
         }
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(binaryHandleUtil.HexByteArray());
@@ -123,68 +115,52 @@ public class ClientSocket {
     @OnMessage
     public void onMessage(Session session, byte[] message) {
         logger.info(" ===> message:{}", message);
-        ByteBuffer byteBuffer = ByteBuffer.wrap(message);
-        logger.info(" ===> byteBuffer:{}", byteBuffer.toString());
+        int[] uintArray = binaryHandleUtil.toUintArrayFromByteArray(message);
 
-        StringBuilder stringBuilder = new StringBuilder();
-        while (byteBuffer.hasRemaining()) {
-            byte b = byteBuffer.get();
-            String s = Byte.toString(b);
-            stringBuilder.append(s);
-        }
-        String toString = stringBuilder.toString();
-        logger.info(" ===> 接收到来自bilibili的数据" + toString);
-
-        try {
-            Integer packageLength = readIntFromByteArray(byteBuffer, 0, 4);
-            Integer headLength = readIntFromByteArray(byteBuffer, 4, 2);
-            Integer ver = readIntFromByteArray(byteBuffer, 6, 2);
-            Integer op = readIntFromByteArray(byteBuffer, 8, 4);
-            Integer seq = readIntFromByteArray(byteBuffer, 12, 4);
-            if (Objects.equals(op, 5)) {
-                String body;
-                int offset = 0;
-                while (offset < message.length) {
-                    int countPackageLength = readIntFromByteArray(byteBuffer, offset + 0, 4);
-                    int countHeadLength = 16;
-                    byte[] car = new byte[countHeadLength + countPackageLength];
-                    logger.info(" ===> packageLength:{}", packageLength);
-                    logger.info(" ===> car:{}, offset:{}, length:{}", car.length, offset + countHeadLength, countPackageLength - countHeadLength - offset);
-                    byteBuffer.rewind();
-                    logger.info(" ===> position:{}", byteBuffer.position());
-                    logger.info(" ===> limit:{}", byteBuffer.limit());
-                    byteBuffer.get(car, offset + countHeadLength, countPackageLength - countHeadLength - offset);
-    //                let body = "{}"
-                    Inflater inflater = new Inflater();
-                    if (Objects.equals(ver, 2)) {
-                        //协议版本为 2 时  数据有进行压缩
-                        int inflate = inflater.inflate(car);
-                        String s = new String(car, 0, inflate, "UTF-8");
-                        logger.info(" ===> s:{}", s);
-                    } else {
-                        //协议版本为 0 时  数据没有进行压缩
-                        int inflate = inflater.inflate(car);
+        Integer packageLength = readIntFromByteArray(uintArray, 0, 4);
+        Integer headLength = readIntFromByteArray(uintArray, 4, 2);
+        Integer ver = readIntFromByteArray(uintArray, 6, 2);
+        Integer op = readIntFromByteArray(uintArray, 8, 4);
+        Integer seq = readIntFromByteArray(uintArray, 12, 4);
+        if (Objects.equals(op, 5)) {
+            String body;
+            int offset = 0;
+            while (offset < packageLength) {
+                int countPackageLength = readIntFromByteArray(uintArray, offset + 0, 4);
+                int countHeadLength = 16;
+                int[] data = Arrays.copyOfRange(uintArray, offset + countHeadLength, offset + countPackageLength);
+                if (Objects.equals(ver, 2)) {
+                    //协议版本为 2 时  数据有进行压缩
+                    StringBuilder builder = new StringBuilder();
+                    for (int value : data) {
+                        builder = binaryHandleUtil.toBinaryStrFromUintArray(value, builder);
                     }
-    //                if (body) {
-    //                    // 同一条消息中可能存在多条信息，用正则筛出来
-    //                    const group = body.split(/[\x00-\x1f]+/);
-    //                    group.forEach(item => {
-    //                    try {
-    //                        result.body.push(JSON.parse(item));
-    //                    }catch (e) {
-    //                        // 忽略非JSON字符串，通常情况下为分隔符
-    //                    }
-    //                    });
-    //                }
-                    offset += countPackageLength;
+                    String strByDecompress = binaryHandleUtil.getStrByDecompress(builder);
+                    logger.info(" ===> strByDecompress:{}", strByDecompress);
+                } else {
+                    //协议版本为 0 时  数据没有进行压缩
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (int value : data) {
+                        byte[] array = binaryHandleUtil.getByteArrayFromInt(value);
+                        String str = new String(array);
+                        logger.info(" ===> str:{}", str);
+                    }
+                    String s = stringBuilder.toString();
                 }
+                //                if (body) {
+                //                    // 同一条消息中可能存在多条信息，用正则筛出来
+                //                    const group = body.split(/[\x00-\x1f]+/);
+                //                    group.forEach(item => {
+                //                    try {
+                //                        result.body.push(JSON.parse(item));
+                //                    }catch (e) {
+                //                        // 忽略非JSON字符串，通常情况下为分隔符
+                //                    }
+                //                    });
+                //                }
+                offset += countPackageLength;
             }
-        } catch (DataFormatException e) {
-            logger.error(e.getMessage(), e);
-        } catch (UnsupportedEncodingException e) {
-            logger.error(e.getMessage(), e);
         }
-        byteBuffer.clear();
     }
 
     private ByteArrayBuffer buildCertifyByte(JSONObject jsonObject) {
@@ -220,11 +196,11 @@ public class ClientSocket {
 
     @Scheduled(fixedRate = 30 * 1000)
     private void heartbeat() {
-        binaryHandleUtil.setUnit(0, UnitEnum.UNIT32, 0)
-                .setUnit(4, UnitEnum.UNIT16, 16)
-                .setUnit(6, UnitEnum.UNIT16, 1)
-                .setUnit(8, UnitEnum.UNIT32, 2)
-                .setUnit(12, UnitEnum.UNIT32, 1);
+        binaryHandleUtil.setUnit(0, UintEnum.UINT32, 0)
+                .setUnit(4, UintEnum.UINT16, 16)
+                .setUnit(6, UintEnum.UINT16, 1)
+                .setUnit(8, UintEnum.UINT32, 2)
+                .setUnit(12, UintEnum.UINT32, 1);
         try {
             ByteBuffer byteBuffer = ByteBuffer.wrap(binaryHandleUtil.HexByteArray());
             this.session.getBasicRemote().sendBinary(byteBuffer);
@@ -234,25 +210,7 @@ public class ClientSocket {
         }
     }
 
-    private Integer readIntFromByteArray(byte[] byteArray, Integer start, Integer len) {
-        Double result = 0.0;
-        for (int i = len - 1; i >= 0; i--) {
-            result += Math.pow(256, len - i - 1) * byteArray[start + i];
-        }
-        logger.info(" ===> result = " + result.intValue());
-        return result.intValue();
-    }
-
-    private Integer readIntFromByteArray(ByteBuffer byteBuffer, Integer start, Integer len) {
-        Double result = 0.0;
-        for (int i = len - 1; i >= 0; i--) {
-            result += Math.pow(256, len - i - 1) * byteBuffer.get(start + i);
-        }
-        logger.info(" ===> result = " + result.intValue());
-        return result.intValue();
-    }
-
-    private Integer readIntFromByteArray(char[] byteBuffer, Integer start, Integer len) {
+    private Integer readIntFromByteArray(int[] byteBuffer, Integer start, Integer len) {
         Double result = 0.0;
         for (int i = len - 1; i >= 0; i--) {
             result += Math.pow(256, len - i - 1) * byteBuffer[start + i];
@@ -260,5 +218,21 @@ public class ClientSocket {
         logger.info(" ===> result = " + result.intValue());
         return result.intValue();
     }
+
+    public static void main(String[] args) throws DataFormatException, UnsupportedEncodingException {
+        byte[] bytes = {0, 0, 1, -12};
+        int[] sah = new int[bytes.length];
+        for (int i = 0; i < bytes.length; i++) {
+            sah[i] = Byte.toUnsignedInt(bytes[i]);
+        }
+        Double result = 0.0;
+        int len = 4;
+        int start = 0;
+        for (int i = len - 1; i >= 0; i--) {
+            result += Math.pow(256, len - i - 1) * sah[start + i];
+        }
+        logger.info(" ===> result = " + result.intValue());
+    }
+
 
 }
