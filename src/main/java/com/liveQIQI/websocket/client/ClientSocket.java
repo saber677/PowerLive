@@ -29,8 +29,6 @@ public class ClientSocket {
 
     private Session session;
 
-    private StringBuilder builder;
-
     String url = "wss://dsa-cn-live-comet-01.chat.bilibili.com:2245/sub";
 
     @Autowired
@@ -129,23 +127,23 @@ public class ClientSocket {
                 int countPackageLength = readIntFromByteArray(uintArray, offset + 0, 4);
                 int countHeadLength = 16;
                 int[] data = Arrays.copyOfRange(uintArray, offset + countHeadLength, offset + countPackageLength);
+                StringBuffer buffer = new StringBuffer();
                 if (Objects.equals(ver, 2)) {
                     //协议版本为 2 时  数据有进行压缩
-                    StringBuilder builder = new StringBuilder();
                     for (int value : data) {
-                        builder = binaryHandleUtil.toBinaryStrFromUintArray(value, builder);
+                        buffer = binaryHandleUtil.toBinaryStrFromUintArray(value, buffer);
                     }
-                    String strByDecompress = binaryHandleUtil.getStrByDecompress(builder);
+                    String strByDecompress = binaryHandleUtil.getStrByDecompress(buffer);
                     logger.info(" ===> strByDecompress:{}", strByDecompress);
                 } else {
                     //协议版本为 0 时  数据没有进行压缩
-                    StringBuilder stringBuilder = new StringBuilder();
                     for (int value : data) {
                         byte[] array = binaryHandleUtil.getByteArrayFromInt(value);
-                        String str = new String(array);
-                        logger.info(" ===> str:{}", str);
+                        String strByByteArray = new String(array);
+                        buffer.append(strByByteArray);
                     }
-                    String s = stringBuilder.toString();
+                    String str = buffer.toString();
+                    logger.info(" ===> str:{}", str);
                 }
                 //                if (body) {
                 //                    // 同一条消息中可能存在多条信息，用正则筛出来
@@ -215,8 +213,11 @@ public class ClientSocket {
         for (int i = len - 1; i >= 0; i--) {
             result += Math.pow(256, len - i - 1) * byteBuffer[start + i];
         }
-        logger.info(" ===> result = " + result.intValue());
         return result.intValue();
+    }
+
+    private void clearBuffer(StringBuffer buffer) {
+        buffer.delete(0, buffer.length());
     }
 
     public static void main(String[] args) throws DataFormatException, UnsupportedEncodingException {

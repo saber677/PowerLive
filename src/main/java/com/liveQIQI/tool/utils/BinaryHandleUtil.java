@@ -11,6 +11,8 @@ import java.util.Objects;
 @Component
 public class BinaryHandleUtil {
 
+    private static final String COMMA = ",";
+
     @Autowired
     private BinaryHandleInstance instance;
 
@@ -66,22 +68,22 @@ public class BinaryHandleUtil {
         return uintArray;
     }
 
-    public StringBuilder toBinaryStrFromUintArray(int value, StringBuilder builder) {
+    public StringBuffer toBinaryStrFromUintArray(int value, StringBuffer builder) {
 
         if (Objects.isNull(value)){
             throw new RuntimeException(" value is null");
         }
 
         String param1 = new String(String.valueOf(value));
-        String param2 = new String(",");
+        String param2 = new String(COMMA);
         builder.append(param1);
         builder.append(param2);
         return builder;
     }
 
-    public String getStrByDecompress(StringBuilder builder){
-        builder.deleteCharAt(builder.length() - 1);
-        String binaryStr = builder.toString();
+    public String getStrByDecompress(StringBuffer buffer){
+        buffer.deleteCharAt(buffer.length() - 1);
+        String binaryStr = buffer.toString();
         byte[] clientBytes = PakoUtil.receive(binaryStr);
         byte[] bytes = ZlibUtil.decompress(clientBytes);
         return new String(bytes);
@@ -90,9 +92,9 @@ public class BinaryHandleUtil {
     public byte[] getByteArrayFromInt(int value){
         byte[] bytes = new byte[1];
         bytes[0] =  (byte) (value & 0xFF);
-        bytes[1] =  (byte) ((value>>8) & 0xFF);
-        bytes[2] =  (byte) ((value>>16) & 0xFF);
-        bytes[3] =  (byte) ((value>>24) & 0xFF);
+//        bytes[1] =  (byte) ((value>>8) & 0xFF);
+//        bytes[2] =  (byte) ((value>>16) & 0xFF);
+//        bytes[3] =  (byte) ((value>>24) & 0xFF);
         return bytes;
     }
 

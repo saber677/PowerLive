@@ -11,6 +11,7 @@ import java.util.Objects;
 public class BinaryHandleInstance {
 
     private static final char ZERO = '0';
+
     private StringBuffer reqParam;
 
     public StringBuffer handleByteData(Integer offset, UintEnum unit, String valueStr) {
