@@ -4,8 +4,10 @@ package com.liveQIQI.websocket.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.liveQIQI.enums.UintEnum;
+import com.liveQIQI.tool.entity.Regex;
 import com.liveQIQI.tool.utils.BinaryHandleUtil;
 import com.sun.xml.internal.ws.util.ByteArrayBuffer;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,10 +35,7 @@ public class ClientSocket {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientSocket.class);
 
-    private static final String REGEX_LIVE_RESPONSE_JSON_STR = "\\{\"cmd\"[^\\}].*";
-//    private static final String REGEX_LIVE_RESPONSE_JSON_STR1 = "\\[\\x00-\\x1f]+\\";
-
-    private static final Pattern PATTERN = Pattern.compile(REGEX_LIVE_RESPONSE_JSON_STR);
+    private static final Pattern PATTERN = Pattern.compile(Regex.KEY_VALUE_JSON_STR);
 
     private Session session;
 
@@ -123,7 +122,7 @@ public class ClientSocket {
 
     @OnMessage
     public void onMessage(Session session, byte[] message) {
-        logger.info(" ===> message:{}", message);
+//        logger.info(" ===> message:{}", message);
         int[] uintArray = binaryHandleUtil.toUintArrayFromByteArray(message);
 
         Integer packageLength = readIntFromByteArray(uintArray, 0, 4);
@@ -165,7 +164,7 @@ public class ClientSocket {
                     try {
                         group = matcher.group();
                         logger.info(" ===> group:{}", group);
-                        map = JSON.parseObject(group, Map.class);
+//                        map = JSON.parseObject(group, Map.class);
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);
                     }
@@ -243,19 +242,21 @@ public class ClientSocket {
     }
 
     public static void main(String[] args) throws DataFormatException, UnsupportedEncodingException {
-        byte[] bytes = {0, 0, 1, -12};
-        int[] sah = new int[bytes.length];
-        for (int i = 0; i < bytes.length; i++) {
-            sah[i] = Byte.toUnsignedInt(bytes[i]);
+//        String s = "{\"cmd\":\"WATCHED_CHANGE\",\"data\":{\"num\":35970810,\"text_small\":\"3597.0万\",\"text_large\":\"3597.0万人看过\"}}\u0003�\u0010\u0005{\"cmd\":\"DANMU_MSG\",\"info\":[[0,1,25,16777215,1673858806363,11607964,0,\"6011d5ae\",0,0,0,\"\",0,\"{}\",\"{}\",{\"mode\":0,\"show_player_type\":0,\"extra\":\"{\\\"send_from_me\\\":false,\\\"mode\\\":0,\\\"color\\\":16777215,\\\"dm_type\\\":0,\\\"font_size\\\":25,\\\"player_mode\\\":1,\\\"show_player_type\\\":0,\\\"content\\\":\\\"666\\\",\\\"user_hash\\\":\\\"1611781550\\\",\\\"emoticon_unique\\\":\\\"\\\",\\\"bulge_display\\\":0,\\\"recommend_score\\\":2,\\\"main_state_dm_color\\\":\\\"\\\",\\\"objective_state_dm_color\\\":\\\"\\\",\\\"direction\\\":0,\\\"pk_direction\\\":0,\\\"quartet_direction\\\":0,\\\"anniversary_crowd\\\":0,\\\"yeah_space_type\\\":\\\"\\\",\\\"yeah_space_url\\\":\\\"\\\",\\\"jump_to_url\\\":\\\"\\\",\\\"space_type\\\":\\\"\\\",\\\"space_url\\\":\\\"\\\",\\\"animation\\\":{},\\\"emots\\\":null}\"},{\"activity_identity\":\"\",\"activity_source\":0,\"not_show\":0}],\"666\",[1085936274,\"SkywalkerForever\",0,0,0,10000,1,\"\"],[10,\"Zc憨憨\",\"魔法Zc目录\",3044248,9272486,\"\",0,9272486,9272486,9272486,0,1,13164144],[0,0,9868950,\"\\u003e50000\",0],[\"\",\"\"],0,0,null,{\"ts\":1673858806,\"ct\":\"77365047\"},0,0,null,null,0,42]}";
+        String s = "{\"cmd\":\"DANMU_MSG\",\"info\":[[0,1,25,16777215,1673881110416,1673881101,0,\"748aa4fc\",0,0,0,\"\",0,\"{}\",\"{}\",{\"mode\":0,\"show_player_type\":0,\"extra\":\"{\\\"send_from_me\\\":false,\\\"mode\\\":0,\\\"color\\\":16777215,\\\"dm_type\\\":0,\\\"font_size\\\":25,\\\"player_mode\\\":1,\\\"show_player_type\\\":0,\\\"content\\\":\\\"kana;\\\",\\\"user_hash\\\":\\\"1955243260\\\",\\\"emoticon_unique\\\":\\\"\\\",\\\"bulge_display\\\":0,\\\"recommend_score\\\":0,\\\"main_state_dm_color\\\":\\\"\\\",\\\"objective_state_dm_color\\\":\\\"\\\",\\\"direction\\\":0,\\\"pk_direction\\\":0,\\\"quartet_direction\\\":0,\\\"anniversary_crowd\\\":0,\\\"yeah_space_type\\\":\\\"\\\",\\\"yeah_space_url\\\":\\\"\\\",\\\"jump_to_url\\\":\\\"\\\",\\\"space_type\\\":\\\"\\\",\\\"space_url\\\":\\\"\\\",\\\"animation\\\":{},\\\"emots\\\":null}\"},{\"activity_identity\":\"\",\"activity_source\":0,\"not_show\":0}],\"kana;\",[49515343,\"nenpenAIagi\",0,0,0,10000,1,\"\"],[],[0,0,9868950,\"\\u003e50000\",0],[\"\",\"\"],0,0,null,{\"ts\":1673881110,\"ct\":\"762E818\"},0,0,null,null,0,7]}\u0000\u0000\u0000{\u0000\u0010\u0000\u0000\u0000\u0000\u0000\u0005\u0000\u0000\u0000\u0000{\"cmd\":\"WATCHED_CHANGE\",\"data\":{\"num\":35975380,\"text_small\":\"3597.5万\",\"text_large\":\"3597.5万人看过\"}}";
+
+//        Pattern compile = Pattern.compile("[\\x00-\\xff].?");
+        Pattern compile = Pattern.compile("\\{\"cmd\"[^\\}].*");
+        Matcher matcher = compile.matcher(s);
+
+        StringBuffer stringBuffer = new StringBuffer();
+        while (matcher.find()) {
+            String group = matcher.group();
+            stringBuffer.append(group);
+//            logger.info(" ===> result:{}", group);
         }
-        Double result = 0.0;
-        int len = 4;
-        int start = 0;
-        for (int i = len - 1; i >= 0; i--) {
-            result += Math.pow(256, len - i - 1) * sah[start + i];
-        }
-        logger.info(" ===> result = " + result.intValue());
+        logger.info(" ===> result:{}", stringBuffer.toString());
+
+
     }
-
-
 }
