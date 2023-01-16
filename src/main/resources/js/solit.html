@@ -135,7 +135,6 @@
         for (let i = len - 1; i >= 0; i--) {
             result += Math.pow(256, len - i - 1) * buffer[start + i]
         }
-        console.log(" ===> result" + result)
         return result
     }
 
@@ -167,6 +166,7 @@
                         //协议版本为 2 时  数据有进行压缩 通过pako.js 进行解压
                         let inflate = pako.inflate(data);
                         body = textDecoder.decode(pako.inflate(data));
+                        console.log(" ===> body " + body)
                     } else {
                         //协议版本为 0 时  数据没有进行压缩
                         body = textDecoder.decode(data);

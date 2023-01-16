@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import sun.jvm.hotspot.runtime.Bytes;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 @Component
@@ -83,10 +84,15 @@ public class BinaryHandleUtil {
 
     public String getStrByDecompress(StringBuffer buffer){
         buffer.deleteCharAt(buffer.length() - 1);
-        String binaryStr = buffer.toString();
+        String binaryStr = buffer.toString();//binaryStr: 0, 0, 0, 26, 0, 16, 0, 1, 0, 0, 0, 8,
+
+        if (Objects.isNull(binaryStr)){
+            throw new RuntimeException("binaryStr is null");
+        }
+
         byte[] clientBytes = PakoUtil.receive(binaryStr);
         byte[] bytes = ZlibUtil.decompress(clientBytes);
-        return new String(bytes);
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     public byte[] getByteArrayFromInt(int value){

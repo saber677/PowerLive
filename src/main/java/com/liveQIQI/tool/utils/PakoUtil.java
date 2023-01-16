@@ -8,12 +8,11 @@ public class PakoUtil {
             /**
              * 将数字字符串 ->  byte[]
              */
-            String[] a = arrInt.split(",");
+            String[] a = arrInt.split(",");//arrInt: 0, 0, 0, 26, 0, 16, 0, 1, 0, 0, 0, 8,
             byte[] clientBytes = new byte[a.length];
             int i = 0;
             for (String e : a) {
                 clientBytes[i] = Integer.valueOf(e).byteValue();
-
                 i++;
             }
             return clientBytes;

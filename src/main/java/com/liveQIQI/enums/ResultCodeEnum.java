@@ -1,4 +1,4 @@
-package com.liveQIQI.tool.enums;
+package com.liveQIQI.enums;
 
 public enum ResultCodeEnum {
 

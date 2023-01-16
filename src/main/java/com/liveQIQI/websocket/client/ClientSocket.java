@@ -1,6 +1,7 @@
 package com.liveQIQI.websocket.client;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.liveQIQI.enums.UintEnum;
 import com.liveQIQI.tool.utils.BinaryHandleUtil;
@@ -16,9 +17,14 @@ import javax.websocket.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
+import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
 
 @ClientEndpoint
@@ -26,6 +32,11 @@ import java.util.zip.DataFormatException;
 public class ClientSocket {
 
     private static final Logger logger = LoggerFactory.getLogger(ClientSocket.class);
+
+    private static final String REGEX_LIVE_RESPONSE_JSON_STR = "\\{\"cmd\"[^\\}].*";
+//    private static final String REGEX_LIVE_RESPONSE_JSON_STR1 = "\\[\\x00-\\x1f]+\\";
+
+    private static final Pattern PATTERN = Pattern.compile(REGEX_LIVE_RESPONSE_JSON_STR);
 
     private Session session;
 
@@ -121,7 +132,7 @@ public class ClientSocket {
         Integer op = readIntFromByteArray(uintArray, 8, 4);
         Integer seq = readIntFromByteArray(uintArray, 12, 4);
         if (Objects.equals(op, 5)) {
-            String body;
+            String bodyStr;
             int offset = 0;
             while (offset < packageLength) {
                 int countPackageLength = readIntFromByteArray(uintArray, offset + 0, 4);
@@ -133,29 +144,40 @@ public class ClientSocket {
                     for (int value : data) {
                         buffer = binaryHandleUtil.toBinaryStrFromUintArray(value, buffer);
                     }
-                    String strByDecompress = binaryHandleUtil.getStrByDecompress(buffer);
-                    logger.info(" ===> strByDecompress:{}", strByDecompress);
+                    bodyStr = binaryHandleUtil.getStrByDecompress(buffer);
+                    logger.info(" ===> strByDecompress:{}", bodyStr);
                 } else {
                     //协议版本为 0 时  数据没有进行压缩
                     for (int value : data) {
                         byte[] array = binaryHandleUtil.getByteArrayFromInt(value);
-                        String strByByteArray = new String(array);
+                        String strByByteArray = new String(array, StandardCharsets.UTF_8);
                         buffer.append(strByByteArray);
                     }
-                    String str = buffer.toString();
-                    logger.info(" ===> str:{}", str);
+                    bodyStr = buffer.toString();
+                    logger.info(" ===> str:{}", bodyStr);
                 }
-                //                if (body) {
-                //                    // 同一条消息中可能存在多条信息，用正则筛出来
-                //                    const group = body.split(/[\x00-\x1f]+/);
-                //                    group.forEach(item => {
-                //                    try {
-                //                        result.body.push(JSON.parse(item));
-                //                    }catch (e) {
-                //                        // 忽略非JSON字符串，通常情况下为分隔符
-                //                    }
-                //                    });
-                //                }
+
+                // 同一条消息中可能存在多条信息，用正则筛出来
+                Matcher matcher = PATTERN.matcher(bodyStr);
+                String group = "";
+                Map map = null;
+                while (matcher.find()) {
+                    try {
+                        group = matcher.group();
+                        logger.info(" ===> group:{}", group);
+                        map = JSON.parseObject(group, Map.class);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
+                    }
+                }
+
+//                group.forEach(item = > {
+//                try {
+//                    result.body.push(JSON.parse(item));
+//                } catch (e) {
+//                    // 忽略非JSON字符串，通常情况下为分隔符
+//                }
+//                                    });
                 offset += countPackageLength;
             }
         }

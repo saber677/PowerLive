@@ -4,7 +4,6 @@ import com.liveQIQI.tool.entity.Result;
 import com.liveQIQI.tool.utils.ResultUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.validation.BindingResultUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;

@@ -2,8 +2,8 @@ package com.liveQIQI.tool.utils;
 
 
 import com.liveQIQI.tool.entity.Result;
-import com.liveQIQI.tool.enums.ResultCodeEnum;
-import com.liveQIQI.tool.enums.ResultMsgEnum;
+import com.liveQIQI.enums.ResultCodeEnum;
+import com.liveQIQI.enums.ResultMsgEnum;
 import org.apache.commons.lang3.StringUtils;
 
 public class ResultUtil {

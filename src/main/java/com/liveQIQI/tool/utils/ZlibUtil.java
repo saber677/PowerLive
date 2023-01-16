@@ -1,9 +1,6 @@
 package com.liveQIQI.tool.utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.zip.Deflater;
 import java.util.zip.DeflaterOutputStream;
 import java.util.zip.Inflater;
@@ -11,9 +8,6 @@ import java.util.zip.InflaterInputStream;
 
 /**
  * zlib 压缩算法
- * java 就是牛，原生支持
- * @author jx
- *
  */
 public class ZlibUtil {
 
@@ -21,8 +15,7 @@ public class ZlibUtil {
     /**
      * 压缩  
      *
-     * @param data
-     *            待压缩数据  
+     * @param data 待压缩数据
      * @return byte[] 压缩后的数据  
      */
     public static byte[] compress(byte[] data) {
@@ -57,12 +50,8 @@ public class ZlibUtil {
 
     /**
      * 压缩  
-     *
-     * @param data
-     *            待压缩数据  
-     *
-     * @param os
-     *            输出流  
+     * @param data 待压缩数据
+     * @param os   输出流
      */
     public static void compress(byte[] data, OutputStream os) {
         DeflaterOutputStream dos = new DeflaterOutputStream(os);
@@ -80,10 +69,8 @@ public class ZlibUtil {
 
     /**
      * 解压缩  
-     *
-     * @param data
-     *            待压缩的数据  
-     * @return byte[] 解压缩后的数据  
+     * @param data 待解压的数据
+     * @return byte[] 解压缩后的数据
      */
     public static byte[] decompress(byte[] data) {
         byte[] output = new byte[0];
@@ -110,16 +97,13 @@ public class ZlibUtil {
                 e.printStackTrace();
             }
         }
-
         decompresser.end();
         return output;
     }
 
     /**
      * 解压缩  
-     *
-     * @param is
-     *            输入流  
+     * @param is 输入流
      * @return byte[] 解压缩后的数据  
      */
     public static byte[] decompress(InputStream is) {
