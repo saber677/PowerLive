@@ -4,6 +4,8 @@ package com.liveQIQI.websocket.client;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.liveQIQI.enums.UintEnum;
+import com.liveQIQI.model.vo.LiveRespDanMuVO;
+import com.liveQIQI.service.LiveResponseMsgService;
 import com.liveQIQI.tool.entity.Regex;
 import com.liveQIQI.tool.utils.BinaryHandleUtil;
 import com.sun.xml.internal.ws.util.ByteArrayBuffer;
@@ -41,19 +43,8 @@ public class ClientSocket {
 
     @Autowired
     private BinaryHandleUtil binaryHandleUtil;
-
-//    public void init(){
-//        try {
-//            WebSocketContainer container = ContainerProvider.getWebSocketContainer();
-//            URI uri = URI.create(url);
-//            ClientSocket clientSocket = new ClientSocket();
-//            container.connectToServer(clientSocket, uri);
-//        } catch (DeploymentException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
+    @Autowired
+    private LiveResponseMsgService liveResponseMsgService;
 
     @PostConstruct
     void init() {
@@ -121,7 +112,7 @@ public class ClientSocket {
     @OnMessage
     public void onMessage(Session session, byte[] message) {
 //        logger.info(" ===> message:{}", message);
-        int[] uintArray = binaryHandleUtil.toUintArrayFromByteArray(message);
+        int[] uintArray = binaryHandleUtil.toUintArrayFromByteArray(message);//转成无符号整型 uint: 0, 0, 1, -12, 0, 16, 0, 1, 0, 0, 0, 8
 
         Integer packageLength = readIntFromByteArray(uintArray, 0, 4);
         Integer headLength = readIntFromByteArray(uintArray, 4, 2);
@@ -138,7 +129,7 @@ public class ClientSocket {
                 StringBuffer buffer = new StringBuffer();
                 if (Objects.equals(ver, 2)) {
                     //协议版本为 2 时  数据有进行压缩
-                    for (int value : data) {
+                    for (int value : data) {//data: 0, 0, 0, 26, 0, 16, 0, 1, 0, 0, 0, 8
                         buffer = binaryHandleUtil.toBinaryStrFromUintArray(value, buffer);
                     }
                     bodyStr = binaryHandleUtil.getStrByDecompress(buffer);
@@ -146,6 +137,7 @@ public class ClientSocket {
                 } else {
                     //协议版本为 0 时  数据没有进行压缩
                     for (int value : data) {
+                        //没不需要解压直接把无符号整型转成字节 在重新构造字符串
                         byte[] array = binaryHandleUtil.getByteArrayFromInt(value);
                         String strByByteArray = new String(array, StandardCharsets.UTF_8);
                         buffer.append(strByByteArray);
@@ -154,14 +146,15 @@ public class ClientSocket {
                     logger.info(" ===> str:{}", bodyStr);
                 }
 
-                // 同一条消息中可能存在多条信息，用正则筛出来
+                // 同一条弹幕消息中可能存在多条信息，用正则筛出来
                 Matcher matcher = PATTERN.matcher(bodyStr);
                 StringBuffer stringBuffer = new StringBuffer();
                 String group = "";
-                Map map = null;
+                JSONObject jsonObject = null;
                 if (matcher.find()) {
-                    group = matcher.group();
+                    group = matcher.group();//group: "{\"cmd\":\"DANMU_MSG\",\"info\":[[0,1,25,16777215,1673881110416,1673881101,0,\"748aa4fc\",0,0,0,\"\",0,\"{}\",\"{}\",{\"mode\":0,\"show_player_type\":0,\"extra\":\"{\\\"send_from_me\\\":false,\\\"mode\\\":0,\\\"color\\\":16777215,\\\"dm_type\\\":0,\\\"font_size\\\":25,\\\"player_mode\\\":1,\\\"show_player_type\\\":0,\\\"content\\\":\\\"kana;\\\",\\\"user_hash\\\":\\\"1955243260\\\",\\\"emoticon_unique\\\":\\\"\\\",\\\"bulge_display\\\":0,\\\"recommend_score\\\":0,\\\"main_state_dm_color\\\":\\\"\\\",\\\"objective_state_dm_color\\\":\\\"\\\",\\\"direction\\\":0,\\\"pk_direction\\\":0,\\\"quartet_direction\\\":0,\\\"anniversary_crowd\\\":0,\\\"yeah_space_type\\\":\\\"\\\",\\\"yeah_space_url\\\":\\\"\\\",\\\"jump_to_url\\\":\\\"\\\",\\\"space_type\\\":\\\"\\\",\\\"space_url\\\":\\\"\\\",\\\"animation\\\":{},\\\"emots\\\":null}\"},{\"activity_identity\":\"\",\"activity_source\":0,\"not_show\":0}],\"kana;\",[49515343,\"nenpenAIagi\",0,0,0,10000,1,\"\"],[],[0,0,9868950,\"\\u003e50000\",0],[\"\",\"\"],0,0,null,{\"ts\":1673881110,\"ct\":\"762E818\"},0,0,null,null,0,7]}\u0000\u0000\u0000{\u0000\u0010\u0000\u0000\u0000\u0000\u0000\u0005\u0000\u0000\u0000\u0000{\"cmd\":\"WATCHED_CHANGE\",\"data\":{\"num\":35975380,\"text_small\":\"3597.5万\",\"text_large\":\"3597.5万人看过\"}}";
                     char[] chars = group.toCharArray();
+                    //遇到\u0000 后面就可以不需要遍历了 直接终止
                     for (char aChar : chars) {
                         if (Objects.equals(0, aChar - 0)) {
                             break;
@@ -169,7 +162,9 @@ public class ClientSocket {
                         stringBuffer.append(String.valueOf(aChar));
                     }
                     try {
-                        map = JSON.parseObject(stringBuffer.toString(), Map.class);
+                        jsonObject = JSON.parseObject(stringBuffer.toString());
+                        LiveRespDanMuVO liveRespDanMuVO = liveResponseMsgService.ToVOFromJson(jsonObject);
+                        logger.info(" ===> 弹幕内容:{}", liveRespDanMuVO.toString());
                     } catch (Exception e) {
                         logger.error(" ===> error:{}", stringBuffer.toString());
                     }

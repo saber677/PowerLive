@@ -84,7 +84,7 @@ public class BinaryHandleUtil {
 
     public String getStrByDecompress(StringBuffer buffer){
         buffer.deleteCharAt(buffer.length() - 1);
-        String binaryStr = buffer.toString();//binaryStr: 0, 0, 0, 26, 0, 16, 0, 1, 0, 0, 0, 8,
+        String binaryStr = buffer.toString();//binaryStr: 0, 0, 0, 26, 0, 16, 0, 1, 0, 0, 0, 8
 
         if (Objects.isNull(binaryStr)){
             throw new RuntimeException("binaryStr is null");
