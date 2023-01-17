@@ -8,13 +8,13 @@ import com.liveQIQI.model.vo.LiveRespDanMuVO;
 import com.liveQIQI.service.LiveResponseMsgService;
 import com.liveQIQI.tool.entity.Regex;
 import com.liveQIQI.tool.utils.BinaryHandleUtil;
-import com.sun.xml.internal.ws.util.ByteArrayBuffer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import javax.websocket.*;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -80,12 +80,12 @@ public class ClientSocket {
     public void onOpen(Session session) {
         this.session = session;
         logger.info(" ===> 连接 billibili 成功");
-        ByteArrayBuffer dataBytes = buildCertifyByte(init(this.roomId));
+        ByteArrayOutputStream dataBytes = buildCertifyByte(init(this.roomId));
         if (Objects.isNull(dataBytes)) {
             throw new RuntimeException(" ===> 认证数据结果为空");
         }
         int size = dataBytes.size();
-        byte[] bytes = dataBytes.getRawData();
+        byte[] bytes = dataBytes.toByteArray();
 
         binaryHandleUtil.setUnit(0, UintEnum.UINT32, size + 16)
                 .setUnit(4, UintEnum.UINT16, 16)
@@ -183,8 +183,8 @@ public class ClientSocket {
         }
     }
 
-    private ByteArrayBuffer buildCertifyByte(JSONObject jsonObject) {
-        ByteArrayBuffer bytes = new ByteArrayBuffer();
+    private ByteArrayOutputStream buildCertifyByte(JSONObject jsonObject) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
         String jsonStr = jsonObject.toJSONString();
         int length = jsonStr.length();
         char c;
