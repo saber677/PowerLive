@@ -14,8 +14,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.PostConstruct;
 import javax.websocket.*;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -37,7 +35,16 @@ public class ClientSocket {
 
     private static final Pattern PATTERN = Pattern.compile(Regex.LIVE_RESPONSE_DANMU_MSG);
 
+    private static final String BUILD_JSON_PARAM_WEB = "web";
+    private static final String BUILD_JSON_PARAM_CLIENTVER = "1.4.0";
+    private static final Integer BUILD_JSON_PARAM_UID = 0;
+    private static final Integer BUILD_JSON_PARAM_PROTOVER = 1;
+
+    private JSONObject json;
+
     private Session session;
+
+    private Integer roomId;
 
     String url = "wss://dsa-cn-live-comet-01.chat.bilibili.com:2245/sub";
 
@@ -46,9 +53,21 @@ public class ClientSocket {
     @Autowired
     private LiveResponseMsgService liveResponseMsgService;
 
-    @PostConstruct
-    void init() {
+    private JSONObject init(Integer roomId) {
+        this.json = new JSONObject();
+        json.put("roomid", roomId);
+        json.put("uid", BUILD_JSON_PARAM_UID);
+        json.put("protover", BUILD_JSON_PARAM_PROTOVER);
+        json.put("platform", BUILD_JSON_PARAM_WEB);
+        json.put("clientver", BUILD_JSON_PARAM_CLIENTVER);
+//        json.put("type", 2);
+//        json.put("key", "u91Sk476h2FV7KCv59U35sEAuVNmQUq0yBfeqJVHIKZqkxVPe_hJYD1GKS-cS43jNMVpD_TEih7K-ybwqpGvotO7luheMjhEi0w7wjILrm8WJ-dL4xid3D0rnJiP7QruH3xTVYNw41xffdF5-UM=");
+        return json;
+    }
+
+    public void start(Integer roomId) {
         try {
+            this.roomId = roomId;
             WebSocketContainer container = ContainerProvider.getWebSocketContainer();
             URI uri = URI.create(url);
             container.connectToServer(ClientSocket.this, uri);
@@ -61,17 +80,7 @@ public class ClientSocket {
     public void onOpen(Session session) {
         this.session = session;
         logger.info(" ===> 连接 billibili 成功");
-
-        JSONObject json = new JSONObject();
-        json.put("uid", 0);
-        json.put("roomid", 21144080);//todo _
-        json.put("protover", 1);
-        json.put("platform", "web");
-        json.put("clientver", "1.4.0");
-//        json.put("type", 2);
-//        json.put("key", "u91Sk476h2FV7KCv59U35sEAuVNmQUq0yBfeqJVHIKZqkxVPe_hJYD1GKS-cS43jNMVpD_TEih7K-ybwqpGvotO7luheMjhEi0w7wjILrm8WJ-dL4xid3D0rnJiP7QruH3xTVYNw41xffdF5-UM=");
-
-        ByteArrayBuffer dataBytes = buildCertifyByte(json);
+        ByteArrayBuffer dataBytes = buildCertifyByte(init(this.roomId));
         if (Objects.isNull(dataBytes)) {
             throw new RuntimeException(" ===> 认证数据结果为空");
         }
