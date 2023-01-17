@@ -5,7 +5,7 @@ public class Regex {
     /**
      * 匹配b站返回的弹幕前缀
      */
-    public static final String LIVE_RESPONSE_DANMU_MSG = "\\{\"cmd\":\"DANMU_MSG\":[^\\}].*";
+    public static final String LIVE_RESPONSE_DANMU_MSG = "\\{\"cmd\":\"DANMU_MSG\",[^\\}].*";
 
     /**
      * 匹配b站响应通用前缀
