@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 import javax.websocket.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -23,6 +24,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.DataFormatException;
@@ -99,8 +104,14 @@ public class ClientSocket {
         ByteBuffer byteBuffer = ByteBuffer.wrap(binaryHandleUtil.HexByteArray());
         try {
             session.getBasicRemote().sendBinary(byteBuffer);
-            binaryHandleUtil.clearInstanceBuffer();//清楚缓存
-            heartbeat();//心跳请求 保持连接
+            binaryHandleUtil.clearInstanceBuffer();//清除缓存
+            ScheduledExecutorService executorService = Executors.newScheduledThreadPool(4);
+            executorService.scheduleAtFixedRate(new Runnable() {
+                @Override
+                public void run() {
+                    heartbeat();//心跳请求 保持连接
+                }
+            },1,30, TimeUnit.SECONDS);
         } catch (IOException e) {
             logger.error(e.getMessage(), e);
         }
@@ -214,7 +225,7 @@ public class ClientSocket {
         JsScriptUtil.certifyRequest(roomId, url);
     }*/
 
-    @Scheduled(fixedRate = 30 * 1000)
+    //    @Scheduled(fixedRate = 30 * 1000)
     private void heartbeat() {
         binaryHandleUtil.setUnit(0, UintEnum.UINT32, 0)
                 .setUnit(4, UintEnum.UINT16, 16)
