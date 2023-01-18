@@ -1,13 +1,32 @@
+server:
+  port: 9090
+
 spring:
   application:
     name: livebackend
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+#kafka
+  kafka:
+    bootstrap-servers: 1.12.46.18:9092
+    consumer:
+      group-id: myGroup
+      enable-auto-commit: true
+      auto-commit-interval: 100ms
+      properties:
+        session.timeout.ms: 15000
+#      key-deserializer: org.apache.kafka.common.serialization.stringDeserializer
+#      value-deserializer: org.apache.kafka.common.serialization.stringDeserializer
+      auto-offset-reset: earliest
+    producer:
+      retries: 3
+      batch-size: 16384
+      buffer-memory: 33554432
+      key-deserializer: org.apache.kafka.common.serialization.stringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.stringDeserializer
 
 
-server:
-  port: 9090
 # mysql
 datasource:
   url: jdbc:mysql://localhost:3306/powerlive?useUnicode=true&characterEncoding=utf-8&useOldAliasMetadataBehavior=true&serverTimezone=Asia/Shanghai&allowMultiQueries=true
