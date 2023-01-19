@@ -14,6 +14,7 @@ public class KafkaConsumer {
 //    @KafkaListener(topics = {"#{'${kafka.topics}'.split(',')}"})
     @KafkaListener(topics = {"#{T(com.liveQIQI.enums.KafkaTopicEnum).getStrByName('topic01')}"})
     public void listen(ConsumerRecord<?, ?> record) {
+        Object value = record.value();
         logger.info(" ===> KafkaConsumer:{}", "consumer 获取监听");
         logger.info(" ===> content:{}", record.value());
     }

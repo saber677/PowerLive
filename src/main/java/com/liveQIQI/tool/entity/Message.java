@@ -1,5 +1,6 @@
 package com.liveQIQI.tool.entity;
 
+import com.liveQIQI.enums.KafkaTopicEnum;
 import com.liveQIQI.model.vo.LiveRespDanMuVO;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +19,7 @@ public class Message {
 
     private String msg;
 
-    private String topic;
+    private KafkaTopicEnum topic;
 
     private Date date;
 

@@ -13,7 +13,7 @@ public class KafkaSender {
     private KafkaTemplate<String, String> kafkaTemplate;
 
     public void sendMsg(Message message){
-        kafkaTemplate.send(KafkaTopicEnum.topic01.name(), "hello world");
+        kafkaTemplate.send(message.getTopic().name(), message.getMsg());
     }
 
 }

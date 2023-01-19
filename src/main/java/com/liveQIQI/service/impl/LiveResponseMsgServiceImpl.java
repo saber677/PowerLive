@@ -15,7 +15,7 @@ public class LiveResponseMsgServiceImpl implements LiveResponseMsgService {
     private static final String DANMU_INFO = "info";
 
     @Override
-    public LiveRespDanMuVO ToVOFromJson(JSONObject jsonObject) {
+    public LiveRespDanMuVO toVOFromJson(JSONObject jsonObject) {
 
         if (Objects.isNull(jsonObject)) {
             return null;

@@ -3,6 +3,7 @@ package com.liveQIQI.websocket.client;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.liveQIQI.enums.KafkaTopicEnum;
 import com.liveQIQI.enums.UintEnum;
 import com.liveQIQI.kafka.producer.KafkaSender;
 import com.liveQIQI.model.vo.LiveRespDanMuVO;
@@ -25,7 +26,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -186,10 +186,11 @@ public class ClientSocket {
                     }
                     try {
                         jsonObject = JSON.parseObject(stringBuffer.toString());
-                        LiveRespDanMuVO liveRespDanMuVO = liveResponseMsgService.ToVOFromJson(jsonObject);
+                        LiveRespDanMuVO liveRespDanMuVO = liveResponseMsgService.toVOFromJson(jsonObject);
                         kafkaSender.sendMsg(Message.builder()
                                 .vo(liveRespDanMuVO)
-                                .msg("siuahsa")
+                                .msg("hello luqiqi")
+                                .topic(KafkaTopicEnum.topic01)
                                 .build());
                         logger.info(" ===> 弹幕内容:{}", liveRespDanMuVO.toString());
                     } catch (Exception e) {

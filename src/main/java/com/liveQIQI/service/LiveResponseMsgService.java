@@ -4,5 +4,5 @@ import com.liveQIQI.model.vo.LiveRespDanMuVO;
 
 public interface LiveResponseMsgService {
 
-    LiveRespDanMuVO ToVOFromJson(JSONObject jsonObject);
+    LiveRespDanMuVO toVOFromJson(JSONObject jsonObject);
 }
