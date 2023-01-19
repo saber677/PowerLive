@@ -11,9 +11,11 @@ public class KafkaConsumer {
 
     private static final Logger logger = LoggerFactory.getLogger(KafkaConsumer.class);
 
-    @KafkaListener(topics = {"topic01"})
+//    @KafkaListener(topics = {"#{'${kafka.topics}'.split(',')}"})
+    @KafkaListener(topics = {"#{T(com.liveQIQI.enums.KafkaTopicEnum).getStrByName('topic01')}"})
     public void listen(ConsumerRecord<?, ?> record) {
         logger.info(" ===> KafkaConsumer:{}", "consumer 获取监听");
+        logger.info(" ===> content:{}", record.value());
     }
 
 }
