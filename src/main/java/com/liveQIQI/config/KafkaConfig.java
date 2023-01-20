@@ -14,22 +14,22 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
-    @Value("spring.kafka.producer.retries")
+    @Value("${spring.kafka.producer.retries}")
     private String retries;
 
-    @Value("spring.kafka.producer.batch-size")
+    @Value("${spring.kafka.producer.batch-size}")
     private String size;
 
-    @Value("spring.kafka.producer.buffer-memory")
+    @Value("${spring.kafka.producer.buffer-memory}")
     private String memory;
 
-    @Value("spring.kafka.bootstrap-servers")
+    @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapAddress;
 
-    @Value("spring.kafka.producer.key.serialize")
+    @Value("${spring.kafka.producer.key-serializer}")
     private String key;
 
-    @Value("spring.kafka.producer.value.serialize")
+    @Value("${spring.kafka.producer.value-serializer}")
     private String value;
 
     @Bean

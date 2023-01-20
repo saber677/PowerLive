@@ -1,18 +1,12 @@
 package com.liveQIQI.tool.entity;
 
 import com.liveQIQI.enums.KafkaTopicEnum;
+import com.liveQIQI.enums.SocketMessageType;
 import com.liveQIQI.model.vo.LiveRespDanMuVO;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-
 import java.util.Date;
 
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class Message {
 
     private Long id;
@@ -23,6 +17,42 @@ public class Message {
 
     private Date date;
 
+    private SocketMessageType messageType;
+
     private LiveRespDanMuVO vo;
 
+    public Message(Date date) {
+        this.date = date;
+    }
+
+    public static Message build(){
+        return new Message(new Date());
+    }
+
+
+    public Message id(Long id) {
+        this.id = id;
+        return this;
+    }
+
+    public Message msg(String msg) {
+        this.msg = msg;
+        return this;
+    }
+
+    public Message topic(KafkaTopicEnum topic) {
+        this.topic = topic;
+        return this;
+    }
+
+
+    public Message messageType(SocketMessageType messageType) {
+        this.messageType = messageType;
+        return this;
+    }
+
+    public Message vo(LiveRespDanMuVO vo) {
+        this.vo = vo;
+        return this;
+    }
 }
