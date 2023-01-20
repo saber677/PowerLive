@@ -192,7 +192,7 @@ public class ClientSocket {
                                 .msg("hello world")
                                 .topic(KafkaTopicEnum.topic01)
                                 .messageType(SocketMessageType.LIVE_DANMU)
-                                .vo(liveRespDanMuVO));
+                                .liveRespDanMuVO(liveRespDanMuVO));
                         logger.info(" ===> 弹幕内容:{}", liveRespDanMuVO.toString());
                     } catch (Exception e) {
                         logger.error(e.getMessage(), e);

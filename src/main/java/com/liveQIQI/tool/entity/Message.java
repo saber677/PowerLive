@@ -19,7 +19,7 @@ public class Message {
 
     private SocketMessageType messageType;
 
-    private LiveRespDanMuVO vo;
+    private LiveRespDanMuVO liveRespDanMuVO;
 
     public Message(Date date) {
         this.date = date;
@@ -51,8 +51,8 @@ public class Message {
         return this;
     }
 
-    public Message vo(LiveRespDanMuVO vo) {
-        this.vo = vo;
+    public Message liveRespDanMuVO(LiveRespDanMuVO liveRespDanMuVO) {
+        this.liveRespDanMuVO = liveRespDanMuVO;
         return this;
     }
 }
