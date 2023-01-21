@@ -1,17 +1,17 @@
 # live-backend
 
 #### 介绍
-通过websocket或获取bilibili直播弹幕实时弹幕(java实现)
-仓库选择test-live分支即可
+1.仓库选择test-live分支即可
+2.通过websocket或获取bilibili直播弹幕实时弹幕(java实现)
 
-#### 软件架构
-软件架构说明
+
+
 
 #### 待续...
 
 
 
-   
+
 
 
 
