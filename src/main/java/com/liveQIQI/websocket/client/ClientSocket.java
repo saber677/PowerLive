@@ -253,27 +253,5 @@ public class ClientSocket {
         buffer.delete(0, buffer.length());
     }
 
-    public static void main(String[] args) throws DataFormatException, UnsupportedEncodingException {
-//        String s = "{\"cmd\":\"WATCHED_CHANGE\",\"data\":{\"num\":35970810,\"text_small\":\"3597.0万\",\"text_large\":\"3597.0万人看过\"}}\u0003�\u0010\u0005{\"cmd\":\"DANMU_MSG\",\"info\":[[0,1,25,16777215,1673858806363,11607964,0,\"6011d5ae\",0,0,0,\"\",0,\"{}\",\"{}\",{\"mode\":0,\"show_player_type\":0,\"extra\":\"{\\\"send_from_me\\\":false,\\\"mode\\\":0,\\\"color\\\":16777215,\\\"dm_type\\\":0,\\\"font_size\\\":25,\\\"player_mode\\\":1,\\\"show_player_type\\\":0,\\\"content\\\":\\\"666\\\",\\\"user_hash\\\":\\\"1611781550\\\",\\\"emoticon_unique\\\":\\\"\\\",\\\"bulge_display\\\":0,\\\"recommend_score\\\":2,\\\"main_state_dm_color\\\":\\\"\\\",\\\"objective_state_dm_color\\\":\\\"\\\",\\\"direction\\\":0,\\\"pk_direction\\\":0,\\\"quartet_direction\\\":0,\\\"anniversary_crowd\\\":0,\\\"yeah_space_type\\\":\\\"\\\",\\\"yeah_space_url\\\":\\\"\\\",\\\"jump_to_url\\\":\\\"\\\",\\\"space_type\\\":\\\"\\\",\\\"space_url\\\":\\\"\\\",\\\"animation\\\":{},\\\"emots\\\":null}\"},{\"activity_identity\":\"\",\"activity_source\":0,\"not_show\":0}],\"666\",[1085936274,\"SkywalkerForever\",0,0,0,10000,1,\"\"],[10,\"Zc憨憨\",\"魔法Zc目录\",3044248,9272486,\"\",0,9272486,9272486,9272486,0,1,13164144],[0,0,9868950,\"\\u003e50000\",0],[\"\",\"\"],0,0,null,{\"ts\":1673858806,\"ct\":\"77365047\"},0,0,null,null,0,42]}";
-        String s = "{\"cmd\":\"DANMU_MSG\",\"info\":[[0,1,25,16777215,1673881110416,1673881101,0,\"748aa4fc\",0,0,0,\"\",0,\"{}\",\"{}\",{\"mode\":0,\"show_player_type\":0,\"extra\":\"{\\\"send_from_me\\\":false,\\\"mode\\\":0,\\\"color\\\":16777215,\\\"dm_type\\\":0,\\\"font_size\\\":25,\\\"player_mode\\\":1,\\\"show_player_type\\\":0,\\\"content\\\":\\\"kana;\\\",\\\"user_hash\\\":\\\"1955243260\\\",\\\"emoticon_unique\\\":\\\"\\\",\\\"bulge_display\\\":0,\\\"recommend_score\\\":0,\\\"main_state_dm_color\\\":\\\"\\\",\\\"objective_state_dm_color\\\":\\\"\\\",\\\"direction\\\":0,\\\"pk_direction\\\":0,\\\"quartet_direction\\\":0,\\\"anniversary_crowd\\\":0,\\\"yeah_space_type\\\":\\\"\\\",\\\"yeah_space_url\\\":\\\"\\\",\\\"jump_to_url\\\":\\\"\\\",\\\"space_type\\\":\\\"\\\",\\\"space_url\\\":\\\"\\\",\\\"animation\\\":{},\\\"emots\\\":null}\"},{\"activity_identity\":\"\",\"activity_source\":0,\"not_show\":0}],\"kana;\",[49515343,\"nenpenAIagi\",0,0,0,10000,1,\"\"],[],[0,0,9868950,\"\\u003e50000\",0],[\"\",\"\"],0,0,null,{\"ts\":1673881110,\"ct\":\"762E818\"},0,0,null,null,0,7]}\u0000\u0000\u0000{\u0000\u0010\u0000\u0000\u0000\u0000\u0000\u0005\u0000\u0000\u0000\u0000{\"cmd\":\"WATCHED_CHANGE\",\"data\":{\"num\":35975380,\"text_small\":\"3597.5万\",\"text_large\":\"3597.5万人看过\"}}";
 
-        Pattern compile1 = Pattern.compile("[\\x00-\\xff].?");
-        Pattern compile = Pattern.compile("\\{\"cmd\":\"DANMU_MSG\"[^\\}].*");
-        Matcher matcher = compile.matcher(s);
-
-        StringBuffer stringBuffer = new StringBuffer();
-        while (matcher.find()) {
-            String group = matcher.group();
-            char[] chars = group.toCharArray();
-            for (char aChar : chars) {
-                if (Objects.equals(0, aChar - 0)) {
-                    break;
-                }
-                stringBuffer.append(String.valueOf(aChar));
-            }
-        }
-
-        Map map = JSON.parseObject(stringBuffer.toString(), Map.class);
-        logger.info(" ===> result:{}", stringBuffer.toString());
-    }
 }
