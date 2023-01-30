@@ -18,7 +18,7 @@ public class ServerSocket {
 
     private Integer roomId;
 
-    private String message = "好你妈比, 王立全我草你妈比";
+    private String message = "你也好 请注意素质";
 
 
     @OnOpen
